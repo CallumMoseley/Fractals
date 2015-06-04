@@ -41,19 +41,25 @@ public class FractalPanel extends JPanel implements MouseListener,
 		if (fractalNum == 0)
 		{
 			g.drawString("n: " + n, 5, 25);
-			drawFractal(g, iterations, n, 300, getWidth() / 2, getHeight() / 2);
+			drawNFlake(g, iterations, n, 300, getWidth() / 2, getHeight() / 2);
 		}
 		else if (fractalNum == 1)
 		{
-			sierpinskiCarpet(g, iterations, getWidth() / 2, getHeight() / 2, 1000);
+			sierpinskiCarpet(g, iterations, getWidth() / 2, getHeight() / 2,
+					1000);
 		}
 		else if (fractalNum == 2)
 		{
-			sierpinskiTriangle(g, iterations, getWidth() / 2, getHeight() / 2, 500);
+			sierpinskiTriangle(g, iterations, getWidth() / 2, getHeight() / 2,
+					500);
+		}
+		else if (fractalNum == 3)
+		{
+			pythagoreanTree(g, 1, getWidth() / 3, getHeight(), getWidth() / 3, 0);
 		}
 	}
 
-	private void drawFractal(Graphics g, int iter, int n, double size,
+	private void drawNFlake(Graphics g, int iter, int n, double size,
 			double x, double y)
 	{
 		if (iter == 0 || size < 0.25)
@@ -66,9 +72,10 @@ public class FractalPanel extends JPanel implements MouseListener,
 		{
 			double xDiff = Math.cos(angle);
 			double yDiff = Math.sin(angle);
-			g.drawLine((int) x, (int) y, (int) (x + xDiff * size),
-					(int) (y + yDiff * size));
-			drawFractal(g, iter - 1, n, size / 3, x + xDiff * size, y
+			g.drawLine((int) Math.round(x), (int) Math.round(y),
+					(int) Math.round(x + xDiff * size),
+					(int) Math.round(y + yDiff * size));
+			drawNFlake(g, iter - 1, n, size / 3, x + xDiff * size, y
 					+ yDiff * size);
 		}
 	}
@@ -129,13 +136,51 @@ public class FractalPanel extends JPanel implements MouseListener,
 			double angle)
 	{
 		g.fillPolygon(
-				new int[] { (int) (x + Math.cos(Math.PI / 2 + angle) * size),
-						(int) (x + Math.cos(Math.PI * 11 / 6 + angle) * size),
-						(int) (x + Math.cos(Math.PI * 7 / 6 + angle) * size) },
-				new int[] { (int) (y - Math.sin(Math.PI / 2 + angle) * size),
-						(int) (y - Math.sin(Math.PI * 11 / 6 + angle) * size),
-						(int) (y - Math.sin(Math.PI * 7 / 6 + angle) * size) },
-				3);
+				new int[] {
+						(int) Math.round(x + Math.cos(Math.PI / 2 + angle)
+								* size),
+						(int) Math.round(x + Math.cos(Math.PI * 11 / 6 + angle)
+								* size),
+						(int) Math.round(x + Math.cos(Math.PI * 7 / 6 + angle)
+								* size) },
+				new int[] {
+						(int) Math.round(y - Math.sin(Math.PI / 2 + angle)
+								* size),
+						(int) Math.round(y - Math.sin(Math.PI * 11 / 6 + angle)
+								* size),
+						(int) Math.round(y - Math.sin(Math.PI * 7 / 6 + angle)
+								* size) }, 3);
+	}
+
+	public void pythagoreanTree(Graphics g, int iter, double x, double y,
+			double angle, double size)
+	{
+		if (iter == 0)
+		{
+			return;
+		}
+
+		g.fillPolygon(
+				new int[] {
+						(int) Math.round(x),
+						(int) Math.round(x + size * Math.cos(angle)),
+						(int) Math.round(x
+								+ size
+								* (Math.cos(angle) - Math.cos(angle + Math.PI
+										/ 2))),
+						(int) Math.round(x
+								+ size
+								* (Math.cos(Math.PI / 2 - angle)))},
+				new int[] {
+						(int) Math.round(y),
+						(int) Math.round(y + size * Math.sin(angle)),
+						(int) Math.round(y
+								+ size
+								* (Math.sin(angle) - Math.sin(angle + Math.PI
+										/ 2))),
+						(int) Math.round(y
+								+ size
+								* (Math.sin(Math.PI / 2 - angle)))}, 4);
 	}
 
 	@Override
