@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 public class FractalPanel extends JPanel implements MouseListener,
 		MouseMotionListener, KeyListener
 {
-	private static final int MAX_FRACTAL = 3;
+	private static final int MAX_FRACTAL = 4;
 
 	private int[] iterations;
 	private int[] n;
@@ -27,9 +27,9 @@ public class FractalPanel extends JPanel implements MouseListener,
 		addKeyListener(this);
 		setFocusable(true);
 
-		iterations = new int[] { 1, 1, 1, 1 };
-		n = new int[] { 6, 0, 0, 45 };
-		fractalNum = 3;
+		iterations = new int[] { 1, 1, 1, 1, 1 };
+		n = new int[] { 6, 0, 0, 45, 0 };
+		fractalNum = 4;
 	}
 
 	@Override
@@ -63,6 +63,10 @@ public class FractalPanel extends JPanel implements MouseListener,
 			g.drawString("n: " + n[fractalNum], 5, 25);
 			pythagoreanTree(g, iterations[fractalNum], getWidth() * 4 / 9,
 					getWidth() * 5 / 9, getHeight(), getHeight(), Math.PI / 180 * n[fractalNum]);
+		}
+		else if (fractalNum == 4)
+		{
+			binaryTree(g, iterations[fractalNum], getWidth() / 2, getHeight(), Math.PI / 2, 500, Math.PI / 4);
 		}
 	}
 
@@ -198,6 +202,18 @@ public class FractalPanel extends JPanel implements MouseListener,
 								* size) }, 4);
 		pythagoreanTree(g, iter - 1, x1 + Math.cos(angle + Math.PI / 2) * size, x1 + Math.cos(angle + Math.PI / 2) * size + Math.cos(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), y1 - Math.sin(angle + Math.PI / 2) * size, y1 - Math.sin(angle + Math.PI / 2) * size - Math.sin(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), ang);
 		pythagoreanTree(g, iter - 1, x1 + Math.cos(angle + Math.PI / 2) * size + Math.cos(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), x2 + Math.cos(angle + Math.PI / 2) * size, y1 - Math.sin(angle + Math.PI / 2) * size - Math.sin(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), y2 - Math.sin(angle + Math.PI / 2) * size, ang);
+	}
+	
+	private void binaryTree(Graphics g, int iter, double x, double y, double angle, double size, double ang)
+	{
+		if (iter == 0)
+		{
+			return;
+		}
+		
+		g.drawLine((int) Math.round(x), (int) Math.round(y), (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size));
+		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + ang, size / 2, ang);
+		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle - ang, size / 2, ang);
 	}
 
 	@Override
