@@ -12,8 +12,10 @@ import javax.swing.JPanel;
 public class FractalPanel extends JPanel implements MouseListener,
 		MouseMotionListener, KeyListener
 {
-	private int iterations;
-	private int n;
+	private static final int MAX_FRACTAL = 3;
+
+	private int[] iterations;
+	private int[] n;
 	private int fractalNum;
 
 	public FractalPanel()
@@ -25,9 +27,9 @@ public class FractalPanel extends JPanel implements MouseListener,
 		addKeyListener(this);
 		setFocusable(true);
 
-		iterations = 1;
-		n = 6;
-		fractalNum = 0;
+		iterations = new int[] { 1, 1, 1, 1 };
+		n = new int[] { 6, 0, 0, 45 };
+		fractalNum = 3;
 	}
 
 	@Override
@@ -37,25 +39,30 @@ public class FractalPanel extends JPanel implements MouseListener,
 		g.fillRect(0, 0, getWidth(), getHeight());
 
 		g.setColor(Color.BLACK);
-		g.drawString("Iterations: " + iterations, 5, 15);
+		g.drawString("Iterations: " + iterations[fractalNum], 5, 15);
 		if (fractalNum == 0)
 		{
-			g.drawString("n: " + n, 5, 25);
-			drawNFlake(g, iterations, n, 300, getWidth() / 2, getHeight() / 2);
+			g.drawString("n: " + n[fractalNum], 5, 25);
+			drawNFlake(g, iterations[fractalNum], n[fractalNum], 300,
+					getWidth() / 2, getHeight() / 2);
 		}
 		else if (fractalNum == 1)
 		{
-			sierpinskiCarpet(g, iterations, getWidth() / 2, getHeight() / 2,
+			sierpinskiCarpet(g, iterations[fractalNum], getWidth() / 2,
+					getHeight() / 2,
 					1000);
 		}
 		else if (fractalNum == 2)
 		{
-			sierpinskiTriangle(g, iterations, getWidth() / 2, getHeight() / 2,
+			sierpinskiTriangle(g, iterations[fractalNum], getWidth() / 2,
+					getHeight() / 2,
 					500);
 		}
 		else if (fractalNum == 3)
 		{
-			pythagoreanTree(g, 1, getWidth() / 3, getHeight(), getWidth() / 3, 0);
+			g.drawString("n: " + n[fractalNum], 5, 25);
+			pythagoreanTree(g, iterations[fractalNum], getWidth() * 4 / 9,
+					getWidth() * 5 / 9, getHeight(), getHeight(), Math.PI / 180 * n[fractalNum]);
 		}
 	}
 
@@ -64,7 +71,7 @@ public class FractalPanel extends JPanel implements MouseListener,
 	{
 		if (iter == 0 || size < 0.25)
 		{
-			// g.fillRect((int) x, (int) y, 1, 1);
+			g.fillRect((int) x, (int) y, 1, 1);
 			return;
 		}
 
@@ -75,7 +82,13 @@ public class FractalPanel extends JPanel implements MouseListener,
 			g.drawLine((int) Math.round(x), (int) Math.round(y),
 					(int) Math.round(x + xDiff * size),
 					(int) Math.round(y + yDiff * size));
-			drawNFlake(g, iter - 1, n, size / 3, x + xDiff * size, y
+			double sum = 1;
+			for (double k = 1; k <= Math.floor(n / 4); k++)
+			{
+				sum += Math.cos(2 * Math.PI * k / n);
+			}
+			double scaleFactor = 1 / (2 * sum);
+			drawNFlake(g, iter - 1, n, size * scaleFactor, x + xDiff * size, y
 					+ yDiff * size);
 		}
 	}
@@ -152,35 +165,39 @@ public class FractalPanel extends JPanel implements MouseListener,
 								* size) }, 3);
 	}
 
-	public void pythagoreanTree(Graphics g, int iter, double x, double y,
-			double angle, double size)
+	private void pythagoreanTree(Graphics g, int iter, double x1, double x2,
+			double y1, double y2, double ang)
 	{
 		if (iter == 0)
 		{
 			return;
 		}
 
+		double size = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+		double angle = Math.atan((y1 - y2) / (x2 - x1));
+		if (x2 < x1)
+		{
+			angle += Math.PI;
+		}
+
+		g.setColor(Color.BLACK);
 		g.fillPolygon(
 				new int[] {
-						(int) Math.round(x),
-						(int) Math.round(x + size * Math.cos(angle)),
-						(int) Math.round(x
-								+ size
-								* (Math.cos(angle) - Math.cos(angle + Math.PI
-										/ 2))),
-						(int) Math.round(x
-								+ size
-								* (Math.cos(Math.PI / 2 - angle)))},
+						(int) Math.round(x1),
+						(int) Math.round(x2),
+						(int) Math.round(x2 + Math.cos(angle + Math.PI / 2)
+								* size),
+						(int) Math.round(x1 + Math.cos(angle + Math.PI / 2)
+								* size) },
 				new int[] {
-						(int) Math.round(y),
-						(int) Math.round(y + size * Math.sin(angle)),
-						(int) Math.round(y
-								+ size
-								* (Math.sin(angle) - Math.sin(angle + Math.PI
-										/ 2))),
-						(int) Math.round(y
-								+ size
-								* (Math.sin(Math.PI / 2 - angle)))}, 4);
+						(int) Math.round(y1),
+						(int) Math.round(y2),
+						(int) Math.round(y2 - Math.sin(angle + Math.PI / 2)
+								* size),
+						(int) Math.round(y1 - Math.sin(angle + Math.PI / 2)
+								* size) }, 4);
+		pythagoreanTree(g, iter - 1, x1 + Math.cos(angle + Math.PI / 2) * size, x1 + Math.cos(angle + Math.PI / 2) * size + Math.cos(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), y1 - Math.sin(angle + Math.PI / 2) * size, y1 - Math.sin(angle + Math.PI / 2) * size - Math.sin(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), ang);
+		pythagoreanTree(g, iter - 1, x1 + Math.cos(angle + Math.PI / 2) * size + Math.cos(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), x2 + Math.cos(angle + Math.PI / 2) * size, y1 - Math.sin(angle + Math.PI / 2) * size - Math.sin(angle + ang) * Math.sqrt(size * size / 4 + Math.pow(Math.tan(ang) * (size / 2), 2)), y2 - Math.sin(angle + Math.PI / 2) * size, ang);
 	}
 
 	@Override
@@ -193,21 +210,21 @@ public class FractalPanel extends JPanel implements MouseListener,
 	{
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT)
 		{
-			iterations++;
+			iterations[fractalNum]++;
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_LEFT)
 		{
-			iterations--;
-			iterations = Math.max(0, iterations);
+			iterations[fractalNum]--;
+			iterations[fractalNum] = Math.max(0, iterations[fractalNum]);
 		}
-		else if (e.getKeyCode() == KeyEvent.VK_UP && fractalNum == 0)
+		else if (e.getKeyCode() == KeyEvent.VK_UP)
 		{
-			n++;
+			n[fractalNum]++;
 		}
-		else if (e.getKeyCode() == KeyEvent.VK_DOWN && fractalNum == 0)
+		else if (e.getKeyCode() == KeyEvent.VK_DOWN)
 		{
-			n--;
-			n = Math.max(0, n);
+			n[fractalNum]--;
+			n[fractalNum] = Math.max(0, n[fractalNum]);
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_A)
 		{
@@ -217,6 +234,7 @@ public class FractalPanel extends JPanel implements MouseListener,
 		else if (e.getKeyCode() == KeyEvent.VK_D)
 		{
 			fractalNum++;
+			fractalNum = Math.min(fractalNum, MAX_FRACTAL);
 		}
 
 		repaint();
