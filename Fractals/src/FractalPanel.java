@@ -6,16 +6,18 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Calendar;
 
 import javax.swing.JPanel;
 
 public class FractalPanel extends JPanel implements MouseListener,
 		MouseMotionListener, KeyListener
 {
-	private static final int MAX_FRACTAL = 4;
+	private static final int NUM_FRACTAL = 6;
 
 	private int[] iterations;
 	private int[] n;
+	private String[] fractalNames;
 	private int fractalNum;
 
 	public FractalPanel()
@@ -27,9 +29,23 @@ public class FractalPanel extends JPanel implements MouseListener,
 		addKeyListener(this);
 		setFocusable(true);
 
-		iterations = new int[] { 1, 1, 1, 1, 1 };
-		n = new int[] { 6, 0, 0, 45, 0 };
-		fractalNum = 4;
+		iterations = new int[] { 1, 1, 1, 1, 1, 1 };
+		n = new int[] { 6, 0, 0, 45, 0, 0 };
+		fractalNum = 0;
+		fractalNames = new String[] {"N-flake", "Sierpinski's Triangle", "Sierpinski's Carpet", "Pythagorean Tree", "Binary Tree", "Trinary Tree Clock"};
+		
+		Thread repaint = new Thread()
+		{
+			public void run()
+			{
+				while (true)
+				{
+					repaint();
+				}
+			}
+		};
+		
+		repaint.start();
 	}
 
 	@Override
@@ -40,9 +56,11 @@ public class FractalPanel extends JPanel implements MouseListener,
 
 		g.setColor(Color.BLACK);
 		g.drawString("Iterations: " + iterations[fractalNum], 5, 15);
+		
+		g.drawString(fractalNames[fractalNum], 100, 20);
 		if (fractalNum == 0)
 		{
-			g.drawString("n: " + n[fractalNum], 5, 25);
+			g.drawString("n: " + n[fractalNum], 5, 30);
 			drawNFlake(g, iterations[fractalNum], n[fractalNum], 300,
 					getWidth() / 2, getHeight() / 2);
 		}
@@ -60,13 +78,17 @@ public class FractalPanel extends JPanel implements MouseListener,
 		}
 		else if (fractalNum == 3)
 		{
-			g.drawString("n: " + n[fractalNum], 5, 25);
+			g.drawString("n: " + n[fractalNum], 5, 30);
 			pythagoreanTree(g, iterations[fractalNum], getWidth() * 4 / 9,
 					getWidth() * 5 / 9, getHeight(), getHeight(), Math.PI / 180 * n[fractalNum]);
 		}
 		else if (fractalNum == 4)
 		{
-			binaryTree(g, iterations[fractalNum], getWidth() / 2, getHeight(), Math.PI / 2, 500, Math.PI / 4);
+			binaryTree(g, iterations[fractalNum], getWidth() / 2, getHeight(), Math.PI / 2, 300, n[fractalNum] * Math.PI / 180);
+		}
+		else if (fractalNum == 5)
+		{
+			trinaryTreeClock(g, iterations[fractalNum], getWidth() / 2, getHeight(), Math.PI / 2, 300);
 		}
 	}
 
@@ -212,8 +234,26 @@ public class FractalPanel extends JPanel implements MouseListener,
 		}
 		
 		g.drawLine((int) Math.round(x), (int) Math.round(y), (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size));
-		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + ang, size / 2, ang);
-		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle - ang, size / 2, ang);
+		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + ang, size * 2 / 3, ang);
+		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle - ang, size * 2 / 3, ang);
+	}
+	
+	private void trinaryTreeClock(Graphics g, int iter, double x, double y, double angle, double size)
+	{
+		if (iter == 0)
+		{
+			return;
+		}
+		
+		Calendar c = Calendar.getInstance();
+		double hour = (2 * Math.PI) * (1 - c.get(Calendar.HOUR_OF_DAY) / 24.0) + Math.PI / 2;
+		double minute = (2 * Math.PI) * (1 - c.get(Calendar.MINUTE) / 60.0) + Math.PI / 2;
+		double second = (2 * Math.PI) * (1 - c.get(Calendar.SECOND) / 60.0) + Math.PI / 2;
+		
+		g.drawLine((int) Math.round(x), (int) Math.round(y), (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size));
+		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), hour, size * 3 / 10);
+		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), minute, size * 4 / 10);
+		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), second, size * 5 / 10);
 	}
 
 	@Override
@@ -245,12 +285,13 @@ public class FractalPanel extends JPanel implements MouseListener,
 		else if (e.getKeyCode() == KeyEvent.VK_A)
 		{
 			fractalNum--;
-			fractalNum = Math.max(0, fractalNum);
+			fractalNum += NUM_FRACTAL;
+			fractalNum %= NUM_FRACTAL;
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_D)
 		{
 			fractalNum++;
-			fractalNum = Math.min(fractalNum, MAX_FRACTAL);
+			fractalNum %= NUM_FRACTAL;
 		}
 
 		repaint();
