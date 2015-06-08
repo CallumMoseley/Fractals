@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 public class FractalPanel extends JPanel implements MouseListener,
 		MouseMotionListener, KeyListener
 {
-	private static final int NUM_FRACTAL = 6;
+	private static final int NUM_FRACTAL = 7;
 
 	private int[] iterations;
 	private int[] n;
@@ -29,10 +29,10 @@ public class FractalPanel extends JPanel implements MouseListener,
 		addKeyListener(this);
 		setFocusable(true);
 
-		iterations = new int[] { 1, 1, 1, 1, 1, 1 };
-		n = new int[] { 6, 0, 0, 45, 0, 0 };
+		iterations = new int[] { 1, 1, 1, 1, 1, 1, 1 };
+		n = new int[] { 6, 0, 0, 45, 0, 0, 0 };
 		fractalNum = 0;
-		fractalNames = new String[] {"N-flake", "Sierpinski's Triangle", "Sierpinski's Carpet", "Pythagorean Tree", "Binary Tree", "Trinary Tree Clock"};
+		fractalNames = new String[] {"N-flake", "Sierpinski's Carpet", "Sierpinski's Triangle", "Pythagorean Tree", "Binary Tree", "Trinary Tree Clock", "Chaos Game"};
 		
 		Thread repaint = new Thread()
 		{
@@ -89,6 +89,10 @@ public class FractalPanel extends JPanel implements MouseListener,
 		else if (fractalNum == 5)
 		{
 			trinaryTreeClock(g, iterations[fractalNum], getWidth() / 2, getHeight(), Math.PI / 2, 300);
+		}
+		else if (fractalNum == 6)
+		{
+			chaosGame(g, iterations[fractalNum] * 100, getWidth() / 2, getHeight() / 2, 400);
 		}
 	}
 
@@ -251,9 +255,33 @@ public class FractalPanel extends JPanel implements MouseListener,
 		double second = (2 * Math.PI) * (1 - c.get(Calendar.SECOND) / 60.0) + Math.PI / 2;
 		
 		g.drawLine((int) Math.round(x), (int) Math.round(y), (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size));
-		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), hour, size * 3 / 10);
-		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), minute, size * 4 / 10);
-		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), second, size * 5 / 10);
+		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + hour, size * 3 / 10);
+		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + minute, size * 4 / 10);
+		trinaryTreeClock(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + second, size * 5 / 10);
+	}
+	
+	private void chaosGame(Graphics g, int iterations, double centreX, double centreY, double size)
+	{
+		double[] xs = new double[] {centreX, centreX + Math.cos(Math.PI * 11 / 6) * size, centreX + Math.cos(Math.PI * 7 / 6) * size};
+		double[] ys = new double[] {centreY + size, centreY + Math.sin(Math.PI * 11 / 6) * size, centreY + Math.sin(Math.PI * 7 / 6) * size};
+		
+		double currentX = centreX;
+		double currentY = centreY;
+		
+		for (int i = 0; i < 5; i++)
+		{
+			int p = (int) (Math.random() * 3);
+			currentX = (currentX + xs[p]) / 2;
+			currentY = (currentY + ys[p]) / 2;
+		}
+		
+		for (int i = 0; i < iterations; i++)
+		{
+			int p = (int) (Math.random() * 3);
+			currentX = (currentX + xs[p]) / 2;
+			currentY = (currentY + ys[p]) / 2;
+			g.fillRect((int) currentX, (int) currentY, 1, 1);
+		}
 	}
 
 	@Override
