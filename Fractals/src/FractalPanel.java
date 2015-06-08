@@ -234,8 +234,8 @@ public class FractalPanel extends JPanel implements MouseListener,
 		}
 		
 		g.drawLine((int) Math.round(x), (int) Math.round(y), (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size));
-		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + ang, size * 2 / 3, ang);
-		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle - ang, size * 2 / 3, ang);
+		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle + ang, size / Math.sqrt(2), ang);
+		binaryTree(g, iter - 1, (int) Math.round(x + Math.cos(angle) * size), (int) Math.round(y - Math.sin(angle) * size), angle - ang, size / Math.sqrt(2), ang);
 	}
 	
 	private void trinaryTreeClock(Graphics g, int iter, double x, double y, double angle, double size)
